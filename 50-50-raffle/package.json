@@ -2,7 +2,7 @@
   "name": "miamisburg-rotary-raffle",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://MiamisburgRotaryClub.github.io/50-50-raffle",
+  "homepage": "https://MiamisburgRotaryClub.github.io/50-50-raffle/live",
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
