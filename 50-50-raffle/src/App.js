@@ -118,6 +118,37 @@ function App() {
     setAwaitingPayment(true);
   };
 
+const sendWinnerEmail = () => {
+  if (!winner) return;
+  const subject = encodeURIComponent("Miamisburg Rotary 50/50 Raffle Winner");
+  const body = encodeURIComponent(
+    `🎉 Congratulations! 🎉
+
+You have won the Miamisburg Rotary 50/50 Raffle!
+
+Winning Ticket: #${winner.ticketNumber}
+Prize Amount: $${winner.split}
+
+Thank you for supporting our cause!`
+  );
+
+  window.location.href = `mailto:${winner.email}?subject=${subject}&body=${body}`;
+};
+
+const sendWinnerText = () => {
+  if (!winner) return;
+  const message = encodeURIComponent(
+    `🎉 You won the Miamisburg Rotary 50/50 Raffle! 🎉
+
+Winning Ticket: #${winner.ticketNumber}
+Prize: $${winner.split}
+
+Congrats!`
+  );
+
+  window.location.href = `sms:${winner.phone}?body=${message}`;
+};
+
 const confirmPayment = async () => {
   if (!pendingRegistration) return;
 
@@ -463,8 +494,38 @@ Thank you for supporting our cause!`;
                 </div>
               </div>
             </div>
-            <p className="text-center text-gray-600 mb-6 italic">Thank you to all participants for supporting our cause!</p>
-            <button onClick={() => setView('home')} className="w-full text-white font-bold py-3 px-6 rounded-lg transition hover:opacity-90" style={{ backgroundColor: '#01357C' }}>Back to Home</button>
+            <p className="text-center text-gray-600 mb-6 italic">
+  Thank you to all participants for supporting our cause!
+</p>
+
+<div className="space-y-3 mb-6">
+  <button
+    onClick={sendWinnerEmail}
+    className="w-full text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center space-x-2 transition hover:opacity-90"
+    style={{ backgroundColor: '#01357C' }}
+  >
+    <Mail className="w-5 h-5" />
+    <span>Email Winner</span>
+  </button>
+
+  <button
+    onClick={sendWinnerText}
+    className="w-full text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center space-x-2 transition hover:opacity-90"
+    style={{ backgroundColor: '#F7A81B' }}
+  >
+    <MessageSquare className="w-5 h-5" />
+    <span>Text Winner</span>
+  </button>
+</div>
+
+<button
+  onClick={() => setView('home')}
+  className="w-full text-white font-bold py-3 px-6 rounded-lg transition hover:opacity-90"
+  style={{ backgroundColor: '#01357C' }}
+>
+  Back to Home
+</button>
+
           </div>
         </div>
       </div>
