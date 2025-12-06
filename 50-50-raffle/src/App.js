@@ -48,9 +48,9 @@ function App() {
   const [awaitingPayment, setAwaitingPayment] = useState(false);
   const [pendingRegistration, setPendingRegistration] = useState(null);
 
-  // IMPORTANT: Replace with your actual API key before deploying
-  const SHEET_ID = '1SnE54UkrL2eUL2NiG3Hrk4GvDInfJwf55F0nofV7wXM';
-  const API_KEY = 'AIzaSyARaiiNdGQ1aVnDw3nxaL73_S5e0-35w9I';
+  // Backend Web App URL from Google Apps Script deployment
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTVxqYslU4NJbsehqU9Bgc0nzeQ1hAgeiFCZJdFKR5AILFshTRzRomb-batsvgGTHrrw/exec'; // <-- paste your real URL here
+
 
   const calculatePrice = (tickets) => {
     const num = parseInt(tickets) || 0;
@@ -71,21 +71,23 @@ function App() {
 
   const loadStats = async () => {
     try {
-      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Stats!A2:C2?key=${API_KEY}`);
+      const response = await fetch(`${SCRIPT_URL}?action=stats`);
       const data = await response.json();
-      if (data.values && data.values[0]) {
-        const [totalFunds, ticketsSold, lastTicketNumber] = data.values[0];
+      if (data.success) {
         setStats({
-          totalFunds: parseFloat(totalFunds) || 0,
-          split: Math.floor((parseFloat(totalFunds) || 0) / 2),
-          ticketsSold: parseInt(ticketsSold) || 0,
-          lastTicketNumber: parseInt(lastTicketNumber) || 0
+          totalFunds: data.totalFunds,
+          split: data.split,
+          ticketsSold: data.ticketsSold,
+          lastTicketNumber: data.lastTicketNumber,
         });
+      } else {
+        console.error('Error loading stats:', data.error);
       }
     } catch (error) {
       console.error('Error loading stats:', error);
     }
   };
+
 
   useEffect(() => { loadStats(); }, []);
 
@@ -100,70 +102,94 @@ function App() {
     setAwaitingPayment(true);
   };
 
-  const confirmPayment = async () => {
-    setLoading(true);
-    try {
-      await loadStats();
-      const { name, email, phone, ticketCount, totalPaid, paymentMethod } = pendingRegistration;
-      const startTicket = stats.lastTicketNumber + 1;
-      const ticketNumbers = Array.from({ length: ticketCount }, (_, i) => startTicket + i);
-      const newReceipt = { name, email, phone, tickets: ticketCount, ticketNumbers, totalPaid, paymentMethod };
-      
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Registrations!A:H:append?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ values: [[new Date().toISOString(), name, email, phone, ticketCount, ticketNumbers.join(', '), totalPaid, paymentMethod]] })
-      });
+const confirmPayment = async () => {
+  if (!pendingRegistration) return;
 
-      const newTotalFunds = stats.totalFunds + totalPaid;
-      const newTicketsSold = stats.ticketsSold + ticketCount;
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Stats!A2:C2?valueInputOption=USER_ENTERED&key=${API_KEY}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ values: [[newTotalFunds, newTicketsSold, startTicket + ticketCount - 1]] })
-      });
-      
-      setStats({ totalFunds: newTotalFunds, ticketsSold: newTicketsSold, lastTicketNumber: startTicket + ticketCount - 1, split: Math.floor(newTotalFunds / 2) });
-      setReceipt(newReceipt);
-      setView('receipt');
-      setAwaitingPayment(false);
-      setPendingRegistration(null);
-      setFormData({ name: '', email: '', phone: '', ticketCount: '', paymentMethod: 'cash' });
-    } catch (error) {
-      console.error('Error submitting:', error);
+  setLoading(true);
+  try {
+    const { name, email, phone, ticketCount, totalPaid, paymentMethod } = pendingRegistration;
+
+    const params = new URLSearchParams({
+      action: 'register',
+      name,
+      email,
+      phone,
+      ticketCount: String(ticketCount),
+      totalPaid: String(totalPaid),
+      paymentMethod,
+    });
+
+    const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+    const data = await response.json();
+
+    if (!data.success) {
+      console.error('Error from backend:', data.error);
       alert('Error submitting registration. Please try again.');
-    } finally {
       setLoading(false);
+      return;
     }
-  };
 
-  const drawWinner = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Registrations!A2:G?key=${API_KEY}`);
-      const data = await response.json();
-      if (!data.values || data.values.length === 0) {
-        alert('No registrations found!');
-        setLoading(false);
-        return;
-      }
-      const allTickets = [];
-      data.values.forEach(row => {
-        const [, name, email, phone, , ticketNumbers] = row;
-        ticketNumbers.split(',').map(t => parseInt(t.trim())).forEach(ticketNum => {
-          allTickets.push({ ticketNumber: ticketNum, name, email, phone });
-        });
-      });
-      const winner = allTickets[Math.floor(Math.random() * allTickets.length)];
-      setWinner({ ...winner, totalFunds: stats.totalFunds, split: stats.split });
-      setView('winner');
-    } catch (error) {
-      console.error('Error drawing winner:', error);
-      alert('Error drawing winner. Please try again.');
-    } finally {
+    const { totalFunds, ticketsSold, lastTicketNumber, split, ticketNumbers } = data;
+
+    const newReceipt = {
+      name,
+      email,
+      phone,
+      tickets: ticketCount,
+      ticketNumbers,
+      totalPaid,
+      paymentMethod,
+    };
+
+    setStats({
+      totalFunds,
+      ticketsSold,
+      lastTicketNumber,
+      split,
+    });
+
+    setReceipt(newReceipt);
+    setView('receipt');
+    setAwaitingPayment(false);
+    setPendingRegistration(null);
+    setFormData({ name: '', email: '', phone: '', ticketCount: '', paymentMethod: 'cash' });
+  } catch (error) {
+    console.error('Error submitting:', error);
+    alert('Error submitting registration. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const drawWinner = async () => {
+  setLoading(true);
+  try {
+    const response = await fetch(`${SCRIPT_URL}?action=draw`);
+    const data = await response.json();
+
+    if (!data.success) {
+      alert(data.error || 'Error drawing winner. Please try again.');
       setLoading(false);
+      return;
     }
-  };
+
+    setWinner({
+      ticketNumber: data.ticketNumber,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      totalFunds: data.totalFunds,
+      split: data.split,
+    });
+    setView('winner');
+  } catch (error) {
+    console.error('Error drawing winner:', error);
+    alert('Error drawing winner. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const formatReceiptText = () => `Miamisburg Rotary Club
 ===========================
