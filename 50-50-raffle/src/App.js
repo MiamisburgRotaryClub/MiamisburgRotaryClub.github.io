@@ -95,6 +95,18 @@ function App() {
 
   useEffect(() => { loadStats(); }, []);
 
+  useEffect(() => {
+  if (view === 'register') {
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      ticketCount: '',
+      paymentMethod: 'cash',
+    });
+  }
+}, [view]);
+
   const handleSubmit = () => {
     if (!formData.name || !formData.email || !formData.phone || !formData.ticketCount) {
       alert('Please fill in all fields');
