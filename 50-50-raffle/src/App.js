@@ -47,6 +47,7 @@ function App() {
   const [copied, setCopied] = useState(false);
   const [awaitingPayment, setAwaitingPayment] = useState(false);
   const [pendingRegistration, setPendingRegistration] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true); 
 
   // Backend Web App URL from Google Apps Script deployment
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTVxqYslU4NJbsehqU9Bgc0nzeQ1hAgeiFCZJdFKR5AILFshTRzRomb-batsvgGTHrrw/exec'; // <-- paste your real URL here
@@ -70,6 +71,7 @@ function App() {
   };
 
   const loadStats = async () => {
+    setStatsLoading(true); 
     try {
       const response = await fetch(`${SCRIPT_URL}?action=stats`);
       const data = await response.json();
@@ -85,6 +87,8 @@ function App() {
       }
     } catch (error) {
       console.error('Error loading stats:', error);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -259,6 +263,19 @@ Thank you for supporting our cause!`;
             </button>
           </div>
         </div>
+
+        {/* 👇 Spinner overlay while stats load */}
+        {statsLoading && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg px-6 py-4 shadow-lg flex flex-col items-center">
+              <div className="w-10 h-10 border-4 border-gray-300 border-t-[#01357C] rounded-full animate-spin mb-3" />
+              <p className="text-sm font-medium" style={{ color: '#01357C' }}>
+                Loading stats...
+              </p>
+            </div>
+          </div>
+        )}
+
       </div>
     );
   }
