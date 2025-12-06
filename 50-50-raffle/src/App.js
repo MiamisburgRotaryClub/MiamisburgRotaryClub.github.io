@@ -301,7 +301,7 @@ Thank you for supporting our cause!`;
                         <p className="text-sm font-medium text-gray-700 mb-3">Scan to Pay with Venmo:</p>
                         <div className="bg-white p-4 rounded-lg inline-block shadow-sm">
                           <img 
-                            src="/venmo-qr.png"
+                            src="/50-50-raffle/live/venmo-qr.png"
                             alt="Venmo QR Code"
                             className="w-48 h-48 mx-auto"
                           />
