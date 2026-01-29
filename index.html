@@ -7,7 +7,7 @@
   <script>
     var apiURL = 'https://script.google.com/macros/s/AKfycbwMzFtldOKdbjnjI1N-SBOg59nZisWt2eFu8YERdNIH2aSXVzLiX4r5vhYLteIV7iAofg/exec';
     var googleAnalyticsID = 'G-PKB36TCB18';
-    var modalTitle = 'MiamsiburgRotary.org';
+    var modalTitle = 'Miamisburg Rotary Club';
     var windowTitle = 'MiamisburgRotary.org';
 
     // Set the document title to the value of windowTitle
@@ -15,6 +15,97 @@
   </script>
 
   <style>
+    :root {
+      --rotary-blue: #005DAA;
+      --rotary-gold: #F7A81B;
+      --ink: #07162a;
+      --ink-muted: #2a3b57;
+      --surface: #ffffff;
+      --surface-soft: #f1f6ff;
+      --shadow-soft: 0 12px 30px rgba(15, 23, 42, 0.12);
+      --radius: 18px;
+      --spinner-size: 56px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 85% 5%, rgba(0, 93, 170, 0.22), transparent 50%),
+        radial-gradient(circle at 10% 15%, rgba(247, 168, 27, 0.28), transparent 45%),
+        linear-gradient(160deg, #edf2fb 0%, #dfe9f8 60%, #d6e4f7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .page {
+      width: min(520px, 92vw);
+      display: grid;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .brand-pill {
+      align-self: center;
+      justify-self: center;
+      background: var(--rotary-gold);
+      color: #0f2b4c;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: linear-gradient(180deg, #ffffff 0%, #f4f7ff 100%);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      padding: 30px 28px;
+      display: grid;
+      gap: 16px;
+      animation: fade-in 500ms ease-out;
+      border: 1px solid rgba(0, 93, 170, 0.18);
+    }
+
+    .card h1 {
+      margin: 0;
+      font-size: 24px;
+      color: var(--rotary-blue);
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--ink-muted);
+      line-height: 1.5;
+    }
+
+    .spinner {
+      width: var(--spinner-size);
+      height: var(--spinner-size);
+      border-radius: 50%;
+      border: 5px solid rgba(0, 93, 170, 0.18);
+      border-top-color: var(--rotary-blue);
+      border-right-color: var(--rotary-gold);
+      margin: 0 auto;
+      animation: spin 0.9s linear infinite;
+    }
+
+    .status {
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
     /* Modal styles */
     .modal {
       display: flex;
@@ -25,57 +116,97 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(15, 23, 42, 0.45);
       z-index: 1000;
     }
 
-    .modal-content {
-      background-color: #fefefe;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      width: 80%;
-      max-width: 500px;
+    .modal-wrap {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
     }
 
-    .modal-header {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #333;
-      background-color: #f0f0f0;
-      /* Light neutral background color */
-      padding: 10px;
-      border-radius: 10px 10px 0 0;
-      /* Rounded corners for the top */
+    .modal-title {
+      align-self: center;
+      justify-self: center;
+      background: var(--rotary-gold);
+      color: #0f2b4c;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+    }
+
+    .modal-content {
+      background-color: var(--surface);
+      padding: 24px;
+      border-radius: var(--radius);
+      text-align: center;
+      box-shadow: var(--shadow-soft);
+      width: min(520px, 88vw);
+      display: grid;
+      gap: 12px;
+      border: 1px solid rgba(0, 93, 170, 0.2);
     }
 
     .modal p {
-      margin: 10px 0;
+      margin: 0;
+      color: var(--ink-muted);
+      line-height: 1.5;
     }
 
     .modal button {
-      padding: 10px 20px;
-      background-color: gray;
+      padding: 12px 22px;
+      background-color: var(--rotary-blue);
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 999px;
       cursor: pointer;
       font-size: 16px;
+      font-weight: 600;
+      justify-self: center;
+      box-shadow: 0 8px 18px rgba(0, 93, 170, 0.25);
     }
 
     .modal button:hover {
-      background-color: #000;
+      background-color: #00437b;
       color: #fff;
     }
 
     .countdown {
-      font-size: 20px;
+      font-size: 16px;
       font-style: italic;
-      padding-top: 10px;
-      color: rgb(87, 80, 80);
-      margin-top: 10px;
+      padding-top: 4px;
+      color: var(--ink);
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spinner,
+      .card {
+        animation: none;
+      }
     }
   </style>
   <!-- Google tag (gtag.js) -->
@@ -166,10 +297,13 @@
     function getCountdownTemplate(message, countdownSeconds) {
       return `
         <div class="modal">
-          <div class="modal-content">
-            <div class="modal-header">${modalTitle}</div>
-            <p>${message}</p>
-            <p class="countdown">Redirecting in ${countdownSeconds} seconds...</p>
+          <div class="modal-wrap">
+            <div class="modal-title">${modalTitle}</div>
+            <div class="modal-content">
+              <p>${message}</p>
+              <div class="spinner" role="status" aria-live="polite"></div>
+              <p class="countdown">Redirecting in ${countdownSeconds} seconds...</p>
+            </div>
           </div>
         </div>
       `;
@@ -178,10 +312,12 @@
     function getButtonTemplate(message, buttonText) {
       return `
         <div class="modal">
-          <div class="modal-content">
-            <div class="modal-header">${modalTitle}</div>
-            <p>${message}</p>
-            <button id="confirmation-button">${buttonText}</button>
+          <div class="modal-wrap">
+            <div class="modal-title">${modalTitle}</div>
+            <div class="modal-content">
+              <p>${message}</p>
+              <button id="confirmation-button">${buttonText}</button>
+            </div>
           </div>
         </div>
       `;
@@ -192,7 +328,15 @@
 </head>
 
 <body>
-  <div id="api-response">Loading...</div>
+  <main class="page">
+    <div class="brand-pill">Miamisburg Rotary Club</div>
+    <section class="card" id="api-response">
+      <h1>Preparing your link</h1>
+      <p>We are confirming the destination and will redirect you shortly.</p>
+      <div class="spinner" role="status" aria-live="polite"></div>
+      <div class="status">Loading secure destination</div>
+    </section>
+  </main>
 </body>
 
 </html>
