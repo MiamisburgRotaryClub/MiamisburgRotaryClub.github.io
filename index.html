@@ -220,9 +220,18 @@
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
+    gtag('config', googleAnalyticsID, { send_page_view: false });
 
-    gtag('config', googleAnalyticsID);
-
+    // Prevent accidental duplicate page_view events if this script runs twice.
+    (function sendPageViewOnce() {
+      if (window.__gaPageViewSent) return;
+      window.__gaPageViewSent = true;
+      gtag('event', 'page_view', {
+        page_location: window.location.href,
+        page_title: document.title,
+        query_string: window.location.search
+      });
+    })();
   </script>
   <script>
     function fetchApiData() {
@@ -253,7 +262,8 @@
       try {
         const jsonData = JSON.parse(data);
         gtag('event', 'dynamic-redirect', {
-          'app_name': window.location.search + " - " +jsonData.RedirectURL
+          query_string: window.location.search,
+          redirect_url: jsonData.RedirectURL
         });
         console.log('Processing JSON data:', jsonData);
 
